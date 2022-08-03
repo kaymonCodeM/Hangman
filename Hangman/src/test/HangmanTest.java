@@ -13,7 +13,7 @@ class HangmanTest {
     @DisplayName("Initiate Hangman")
     @Test
     void initiateHangman(){
-        String top = "  +---+";
+        String top = "\n  +---+";
         String pole = "      |";
         String ground = "     ===";
         String result = top + "\n\n" + pole + "\n\n" + pole +"\n\n" + pole + "\n\n" +ground;
@@ -22,7 +22,7 @@ class HangmanTest {
     @DisplayName("Full Hangman")
     @Test
     void fullHangman(){
-        String top = "  +---+";
+        String top = "\n  +---+";
         String pole = "      |";
         String ground = "     ===";
         String head = "  O   |";

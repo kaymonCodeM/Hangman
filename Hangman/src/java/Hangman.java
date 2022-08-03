@@ -30,14 +30,14 @@ public class Hangman {
             System.out.println(buildHangman(this.badGuesses));
             System.out.print("\nMissed letters: ");
             for (char c: this.missedLetters){
-                System.out.print(c +" ");
+                System.out.print(c);
             }
             System.out.println("\n");
             System.out.println(this.userBank);
             System.out.println();
 
             if(this.badGuesses==7){
-                System.out.println("You Lose! The word is: " + this.word);
+                System.out.println("You Lose! The word is: \"" + this.word+ "\"");
                 break;
             }
             makeGuess();
@@ -75,9 +75,9 @@ public class Hangman {
     }
 
     public void makeGuess(){
-        System.out.println("Guess a Letter.\n");
-        char userGuessLetter = '_';
-        boolean guessExist = false;
+        System.out.println("Guess a letter.\n");
+        char userGuessLetter;
+        boolean correctGuess = false;
         try {
             Scanner userInput = new Scanner(in);
             userGuessLetter = userInput.next().charAt(0);
@@ -85,26 +85,27 @@ public class Hangman {
         }catch (Exception e){
             System.out.println("Bad user Input");
             makeGuess();
+            return;
         }
 
         if(missedLetters.contains(userGuessLetter)) {
             System.out.println("\nYou have already guessed that letter.Choose again.\n");
-            guessExist = true;
             makeGuess();
+            return;
         }else {
             for (int i = 0; i < this.word.length(); i++) {
                 char letter = this.word.charAt(i);
                 if (userBank[i] == userGuessLetter) {
                     System.out.println("\nYou have already guessed that letter.Choose again.\n");
-                    guessExist= true;
                     makeGuess();
+                    return;
                 } else if (userGuessLetter == letter) {
                     this.userBank[i] = letter;
-                    guessExist = true;
+                    correctGuess = true;
                 }
             }
         }
-        if (!guessExist){
+        if (!correctGuess){
             this.missedLetters.add(userGuessLetter);
             this.badGuesses++;
         }
