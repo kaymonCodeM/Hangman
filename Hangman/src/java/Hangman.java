@@ -7,14 +7,12 @@ import java.util.Scanner;
 public class Hangman {
 
     private final Random rand = new Random();
-    private InputStream in = System.in;
+    private final ArrayList<Character> missedLetters = new ArrayList<>();
+    private Scanner userInput;
     public String[] library = {"cat","dog","mouse","mop","stand","drive","smile","snark","shark","bat","ramp","ton","car","zoo"};
-
     private char[] userBank;
-    private ArrayList<Character> missedLetters = new ArrayList<>();
     private boolean playGame = true;
     private int badGuesses = 0;
-
     private String word;
 
     public Hangman(){
@@ -24,6 +22,7 @@ public class Hangman {
     }
 
     public void playHangman(){
+        setUserInput(new Scanner(System.in));
         System.out.println("  HANGMAN");
 
         while (this.playGame){
@@ -38,11 +37,13 @@ public class Hangman {
 
             if(this.badGuesses==7){
                 System.out.println("You Lose! The word is: \"" + this.word+ "\"");
-                break;
+                playAgain();
+            }else {
+                makeGuess();
             }
-            makeGuess();
-            if (this.word.compareTo(new String(this.userBank))==0){
-                System.out.println("\nYes! The secret word is \"" + this.word + "\"! You have won!" );
+
+            if (this.word.compareTo(new String(this.userBank)) == 0) {
+                System.out.println("\nYes! The secret word is \"" + this.word + "\"! You have won!");
                 playAgain();
             }
 
@@ -53,8 +54,7 @@ public class Hangman {
     public void playAgain(){
         System.out.println("Do you want to play again? (yes or no)\n");
         try {
-            Scanner userInput = new Scanner(in);
-            String again = userInput.next();
+            String again = this.userInput.next();
             if (again.compareTo("yes")==0) {
                 setPlayGame(true);
                 setBadGuesses(0);
@@ -64,6 +64,7 @@ public class Hangman {
                 Arrays.fill(this.userBank, '_');
             } else if (again.compareTo("no")==0) {
                 setPlayGame(false);
+                closeScanner();
             }else {
                 System.out.println("\nNope... yes or no");
                 playAgain();
@@ -79,7 +80,6 @@ public class Hangman {
         char userGuessLetter;
         boolean correctGuess = false;
         try {
-            Scanner userInput = new Scanner(in);
             userGuessLetter = userInput.next().charAt(0);
 
         }catch (Exception e){
@@ -143,6 +143,10 @@ public class Hangman {
 
     }
 
+    public void closeScanner(){
+        this.userInput.close();
+    }
+
     public void setPlayGame(boolean playGame) {
         this.playGame = playGame;
     }
@@ -155,6 +159,33 @@ public class Hangman {
         this.word = word;
     }
 
+    public void setUserInput(Scanner userInput) {
+        this.userInput = userInput;
+    }
+
+    public void setUserBank(char[] userBank) {
+        this.userBank = userBank;
+    }
+
+    public boolean getPlayGame(){
+        return this.playGame;
+    }
+
+    public char[] getUserBank() {
+        return userBank;
+    }
+
+    public String getWord() {
+        return word;
+    }
+
+    public ArrayList<Character> getMissedLetters() {
+        return missedLetters;
+    }
+
+    public Scanner getUserInput() {
+        return userInput;
+    }
 
     public static void main(String[] args) {
         Hangman h = new Hangman();
