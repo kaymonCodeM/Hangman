@@ -65,7 +65,7 @@ class HangmanTest {
         assertTrue(new String(hangman.getUserBank()).contains("o"), "Correct Guess failed (userBank)");
     }
 
-    @DisplayName("Test made bad guess")
+    @DisplayName("Test made bad guess (userBank)")
     @Test
     void makeGuessBadUserBank(){
         hangman.setWord("dog");
