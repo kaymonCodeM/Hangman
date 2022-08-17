@@ -1,7 +1,9 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Scanner;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Hangman {
 
@@ -14,25 +16,27 @@ public class Hangman {
     private int badGuesses = 0;
     private String word;
 
+    private String userName;
+
     public Hangman(){
         setWord(library[(rand.nextInt(this.library.length-1) + 1)]);
-        this.userBank = new char[word.length()];
-        Arrays.fill(this.userBank, '_');
+        String s = Arrays.stream(word.split("")).map(c-> "_").reduce("",(a,b) ->a+b);
+        setUserBank(s.toCharArray());
     }
 
     public void playHangman(){
         setUserInput(new Scanner(System.in));
-        System.out.println("  HANGMAN");
+        System.out.println("Hello! What is your name?\n");
+        System.out.println(greetUser() +"\n");
+        System.out.println("HANGMAN");
 
         while (this.playGame){
-            System.out.println(buildHangman(this.badGuesses));
+            System.out.println(buildHangman());
             System.out.print("\nMissed letters: ");
-            for (char c: this.missedLetters){
-                System.out.print(c);
-            }
+            System.out.print(missedLetters.stream().map(Object::toString).reduce("",(a, b)->a+b));
             System.out.println("\n");
             System.out.println(this.userBank);
-            System.out.println();
+            System.out.println("\n");
 
             if(this.badGuesses==7){
                 System.out.println("You Lose! The word is: \"" + this.word+ "\"");
@@ -40,14 +44,48 @@ public class Hangman {
             }else {
                 makeGuess();
             }
+            if (this.word.compareTo(String.valueOf(this.userBank)) == 0) {
+                System.out.println("\nGreat Job " + this.userName + "! The secret word is \"" + this.word + "\"! You have won!"+ "\n");
 
-            if (this.word.compareTo(new String(this.userBank)) == 0) {
-                System.out.println("\nYes! The secret word is \"" + this.word + "\"! You have won!");
+                Path path = Path.of("Hangman/resources/score.txt");
+                try{
+                    Files.writeString(path,"Name: " + this.userName + ", score: " + this.badGuesses +"\n",
+                            StandardOpenOption.APPEND);
+                }catch (Exception IO){
+                    System.out.println("Error: User score not recorded.");
+                }
+
+                try {
+                    Stream<String> strings = Files.lines(path);
+                    Optional<String> highScore = strings.filter(s->Character.getNumericValue(s.charAt(s.length()-1))<this.badGuesses)
+                            .min(Comparator.comparingInt(a -> Character.getNumericValue(a.charAt(a.length() - 1))));
+                    if (highScore.isPresent()){
+                        System.out.println("You do not have the best score: You will have to beat this person:");
+                        System.out.println(highScore.get()+ "\n");
+                    }else {
+                        System.out.println("Great Job! You have the Best Score with " + this.badGuesses +  " guesses!" +"\n");
+                    }
+                    strings.close();
+                }catch (Exception IO){
+                    System.out.println("Error: Did not recover scores"+ "\n");
+                }
+
+
                 playAgain();
             }
 
         }
 
+    }
+
+    public String greetUser(){
+
+        try{
+            setUserName(this.userInput.next());
+            return "\nWell, "+ this.userName +", You are now playing HANGMAN. guess the word before you get hanged.";
+        }catch (Exception e){
+            return "\nUser name is invalid";
+        }
     }
 
     public void playAgain(){
@@ -59,8 +97,8 @@ public class Hangman {
                 setBadGuesses(0);
                 this.missedLetters.clear();
                 setWord(library[(rand.nextInt(this.library.length-1) + 1)]);
-                this.userBank = new char[this.word.length()];
-                Arrays.fill(this.userBank, '_');
+                String s = Arrays.stream(word.split("")).map(c-> "_").reduce("",(a,b) ->a+b);
+                setUserBank(s.toCharArray());
             } else if (again.compareTo("no")==0) {
                 setPlayGame(false);
                 closeScanner();
@@ -77,7 +115,6 @@ public class Hangman {
     public void makeGuess(){
         System.out.println("Guess a letter.\n");
         char userGuessLetter;
-        boolean correctGuess = false;
         try {
             userGuessLetter = userInput.next().charAt(0);
 
@@ -90,56 +127,29 @@ public class Hangman {
         if(missedLetters.contains(userGuessLetter)) {
             System.out.println("\nYou have already guessed that letter.Choose again.\n");
             makeGuess();
-            return;
+        }else if(String.valueOf(this.userBank).contains(String.valueOf(userGuessLetter))){
+            System.out.println("\nYou have already guessed that letter.Choose again.\n");
+            makeGuess();
+        } else if(this.word.contains(String.valueOf(userGuessLetter))){
+            IntStream.range(0, this.word.length()).filter(i -> this.word.toCharArray()[i] == userGuessLetter).forEach(n -> this.userBank[n] = userGuessLetter);
         }else {
-            for (int i = 0; i < this.word.length(); i++) {
-                char letter = this.word.charAt(i);
-                if (userBank[i] == userGuessLetter) {
-                    System.out.println("\nYou have already guessed that letter.Choose again.\n");
-                    makeGuess();
-                    return;
-                } else if (userGuessLetter == letter) {
-                    this.userBank[i] = letter;
-                    correctGuess = true;
-                }
-            }
-        }
-        if (!correctGuess){
             this.missedLetters.add(userGuessLetter);
             this.badGuesses++;
         }
     }
 
-    public String buildHangman(int guesses){
-        String top = "\n  +---+";
-        String pole = "      |";
-        String ground = "     ===";
-        String head = "  O   |";
-        String upperBody = "  |   |";
-        String lowerBody = "  |   |";
-        String leftLeg = " /";
-        String leftRightLeg = " / \\";
-        String leftArm = " \\";
-        String leftRightArm = " \\ /";
-        switch (guesses){
-            case 1:
-                return top + "\n\n" + head + "\n\n" + pole +"\n\n" + pole + "\n\n" +ground;
-            case 2:
-                return top + "\n\n" + head + "\n\n" + upperBody +"\n\n" + pole + "\n\n" +ground;
-            case 3:
-                return top + "\n\n" + head + "\n\n" + upperBody +"\n\n" + lowerBody + "\n\n" +ground;
-            case 4:
-                return top + "\n\n" + head + "\n\n" + upperBody +"\n\n" + lowerBody + "\n"+ leftLeg+"\n" +ground;
-            case 5:
-                return top + "\n\n" + head + "\n\n" + upperBody +"\n\n" + lowerBody + "\n"+ leftRightLeg+"\n" +ground;
-            case 6:
-                return top + "\n\n" + head + "\n"+ leftArm +"\n" + upperBody +"\n\n" + lowerBody + "\n"+ leftRightLeg+"\n" +ground;
-            case 7:
-                return top + "\n\n" + head + "\n"+ leftRightArm +"\n" + upperBody +"\n\n" + lowerBody + "\n"+ leftRightLeg+"\n" +ground;
-            default:
-                return top + "\n\n" + pole + "\n\n" + pole +"\n\n" + pole + "\n\n" +ground;
-        }
 
+
+    public String buildHangman(){
+        String result = "";
+        try{
+            String s = Files.readString(Path.of("Hangman/resources/hangmanArt.txt"));
+            String temp =  Arrays.stream(s.split("guesses")).filter(e-> e.contains(Integer.toString(this.badGuesses))).reduce("",(a,b) -> a+b);
+            result += temp.substring(1,temp.length()-3);
+        }catch (Exception IO){
+            result += "File was not found";
+        }
+        return result;
     }
 
     public void closeScanner(){
@@ -164,6 +174,10 @@ public class Hangman {
 
     public void setUserBank(char[] userBank) {
         this.userBank = userBank;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public boolean getPlayGame(){

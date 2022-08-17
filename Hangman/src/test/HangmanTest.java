@@ -14,28 +14,6 @@ class HangmanTest {
         hangman = new Hangman();
     }
 
-    @DisplayName("Initiate Hangman")
-    @Test
-    void initiateHangman(){
-        String top = "\n  +---+";
-        String pole = "      |";
-        String ground = "     ===";
-        String result = top + "\n\n" + pole + "\n\n" + pole +"\n\n" + pole + "\n\n" +ground;
-        assertEquals(result,hangman.buildHangman(0),"Initiate Hangman Failed");
-    }
-    @DisplayName("Full Hangman")
-    @Test
-    void fullHangman(){
-        String top = "\n  +---+";
-        String ground = "     ===";
-        String head = "  O   |";
-        String upperBody = "  |   |";
-        String lowerBody = "  |   |";
-        String leftRightLeg = " / \\";
-        String leftRightArm = " \\ /";
-        String result = top + "\n\n" + head + "\n"+ leftRightArm +"\n" + upperBody +"\n\n" + lowerBody + "\n"+ leftRightLeg+"\n" +ground;
-        assertEquals(result,hangman.buildHangman(7),"Full Hangman Failed");
-    }
     @DisplayName("Test YES play again")
     @Test
     void yesPlayAgain(){
