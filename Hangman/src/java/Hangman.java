@@ -39,7 +39,11 @@ public class Hangman {
             System.out.println("\n");
 
             if(this.badGuesses==7){
-                System.out.println("You Lose! The word is: \"" + this.word+ "\"");
+                System.out.println("You Lose! The word is: \"" + this.word+ "\"\n");
+                storeUser();
+
+                System.out.println(getBestPlayer());
+
                 playAgain();
             }else {
                 makeGuess();
@@ -47,29 +51,9 @@ public class Hangman {
             if (this.word.compareTo(String.valueOf(this.userBank)) == 0) {
                 System.out.println("\nGreat Job " + this.userName + "! The secret word is \"" + this.word + "\"! You have won!"+ "\n");
 
-                Path path = Path.of("Hangman/resources/score.txt");
-                try{
-                    Files.writeString(path,"Name: " + this.userName + ", score: " + this.badGuesses +"\n",
-                            StandardOpenOption.APPEND);
-                }catch (Exception IO){
-                    System.out.println("Error: User score not recorded.");
-                }
+                storeUser();
 
-                try {
-                    Stream<String> strings = Files.lines(path);
-                    Optional<String> highScore = strings.filter(s->Character.getNumericValue(s.charAt(s.length()-1))<this.badGuesses)
-                            .min(Comparator.comparingInt(a -> Character.getNumericValue(a.charAt(a.length() - 1))));
-                    if (highScore.isPresent()){
-                        System.out.println("You do not have the best score: You will have to beat this person:");
-                        System.out.println(highScore.get()+ "\n");
-                    }else {
-                        System.out.println("Great Job! You have the Best Score with " + this.badGuesses +  " guesses!" +"\n");
-                    }
-                    strings.close();
-                }catch (Exception IO){
-                    System.out.println("Error: Did not recover scores"+ "\n");
-                }
-
+                System.out.println(getBestPlayer());
 
                 playAgain();
             }
@@ -77,6 +61,36 @@ public class Hangman {
         }
 
     }
+    public void storeUser(){
+        Path path = Path.of("Hangman/resources/score.txt");
+        try{
+            Files.writeString(path,"Name: " + this.userName + ", score: " + this.badGuesses +"\n",
+                    StandardOpenOption.APPEND);
+        }catch (Exception IO){
+            System.out.println("Error: User score not recorded.");
+        }
+    }
+
+    public String getBestPlayer(){
+        String result = "";
+        Path path = Path.of("Hangman/resources/score.txt");
+        try {
+            Stream<String> strings = Files.lines(path);
+            Optional<String> highScore = strings.filter(s->Character.getNumericValue(s.charAt(s.length()-1))<this.badGuesses)
+                    .min(Comparator.comparingInt(a -> Character.getNumericValue(a.charAt(a.length() - 1))));
+            if (highScore.isPresent()){
+                result += "You do not have the best score: You will have to beat this person:\n";
+                result += highScore.get()+ "\n";
+            }else {
+                result += "Great Job! You have the Best Score with " + this.badGuesses +  " guesses!" +"\n";
+            }
+            strings.close();
+        }catch (Exception IO){
+            result +="Error: Did not recover scores"+ "\n";
+        }
+        return result;
+    }
+
 
     public String greetUser(){
 
@@ -198,6 +212,10 @@ public class Hangman {
 
     public Scanner getUserInput() {
         return userInput;
+    }
+
+    public String getUserName() {
+        return userName;
     }
 
     public static void main(String[] args) {

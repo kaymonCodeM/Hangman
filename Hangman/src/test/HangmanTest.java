@@ -2,6 +2,8 @@ import org.junit.jupiter.api.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,6 +14,38 @@ class HangmanTest {
     @BeforeEach
     void setUp() {
         hangman = new Hangman();
+    }
+
+    @DisplayName("Test User Stored into score file")
+    @Test
+    void storeUser(){
+        hangman.setUserName("Stanly");
+        hangman.setBadGuesses(5);
+        hangman.storeUser();
+        String s ="";
+        try{
+            s += Files.readString(Path.of("Hangman/resources/score.txt"));
+        }catch (Exception e){
+            System.out.println("File not found");
+        }
+        assertTrue(s.contains(hangman.getUserName()), "Store user failed");
+    }
+
+    @DisplayName("User name test")
+    @Test
+    void greatUser(){
+        InputStream input = new ByteArrayInputStream("Tom".getBytes());
+        hangman.setUserInput(new Scanner(input));
+        hangman.greetUser();
+        assertEquals(0,hangman.getUserName().compareTo("Tom"),"User name Test Failed");
+    }
+
+    @DisplayName("User has top score")
+    @Test
+    void getBestPlayer(){
+        hangman.setBadGuesses(0);
+        String result = hangman.getBestPlayer();
+        assertEquals(0, result.compareTo("Great Job! You have the Best Score with " + 0 + " guesses!" + "\n"), "Best Score Failed");
     }
 
     @DisplayName("Test YES play again")
